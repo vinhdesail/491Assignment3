@@ -341,7 +341,7 @@ CellularAutomata.prototype.saveData = function(that, pass){
     }
     data['update'] = pass.nextUpdate;
     socket.emit("save", { studentname: "Vinh Vien", statename: "gameData", data: data });
-    socket.emit("load", { studentname: "Vinh Vien", statename: "gameData" });
+    // socket.emit("load", { studentname: "Vinh Vien", statename: "gameData" });
 }
 
 CellularAutomata.prototype.loadData = function(that, pass){
