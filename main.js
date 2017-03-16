@@ -47,6 +47,7 @@ AM.queueDownload("./img/panda/moveRight.png");
 AM.queueDownload("./img/panda/pandaLove.png");
 AM.queueDownload("./img/background.jpg");
 
+
 AM.downloadAll(function () {
     var canvas = document.getElementById("gameWorld");
     var ctx = canvas.getContext("2d");
@@ -65,3 +66,33 @@ AM.downloadAll(function () {
 
     console.log("All Done!");
 });
+
+// SOCKET
+var socket = io.connect("http://76.28.150.193:8888");
+
+// socket.on("load", function (data) {
+//     console.log("here is some data");
+//     console.log(data);
+// });
+
+// socket.emit("save", { studentname: "Vinh Vien", statename: "aState", data: "Hello World" });
+// socket.emit("load", { studentname: "Vinh Vien", statename: "aState" });
+// socket.emit("load", { studentname: "Vinh Vien", statename: "theState" }); // does not work
+
+window.onload = function () {
+
+    // socket.on("ping", function (ping) {
+    //     console.log(ping);
+    //     socket.emit("pong");
+    // });
+
+    socket.on("connect", function () {
+        console.log("Socket connected.")
+    });
+    socket.on("disconnect", function () {
+        console.log("Socket disconnected.")
+    });
+    socket.on("reconnect", function () {
+        console.log("Socket reconnected.")
+    });
+};

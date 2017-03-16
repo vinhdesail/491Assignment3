@@ -173,10 +173,14 @@ function CellularAutomata(game){
 
     var playbuttonY = 530;
     this.playButton = new Cell(this.game,
-                                this.paddingX,
-                                playbuttonY,
-                                50 * 1,
+                                this.paddingX, playbuttonY, 50,
                                 "Play");
+    this.saveButton = new Cell(this.game, 
+                                this.paddingX + 80, playbuttonY, 50, 
+                                "Save", this.saveData, this);
+    this.loadButton = new Cell(this.game, 
+                                this.paddingX + 160, playbuttonY, 50, 
+                                "load", this.loadData, this);
 
 }
 
@@ -186,6 +190,8 @@ CellularAutomata.prototype.constructor = CellularAutomata;
 CellularAutomata.prototype.update = function () {
     // UPDATE BUTTONS
     this.playButton.update();
+    this.saveButton.update();
+    this.loadButton.update();
 
     if(this.playButton.alive){
         this.elapsedTime += this.game.clockTick;
@@ -217,6 +223,8 @@ CellularAutomata.prototype.update = function () {
 CellularAutomata.prototype.draw = function () {
     // DRAW BUTTONS
     this.playButton.draw();
+    this.saveButton.draw();
+    this.loadButton.draw();
 
     // DRAW NEXT UPDATE LOCATION
     var tempY = (this.nextUpdate - 1) * (this.cellSize + this.cellspacing);
@@ -315,9 +323,52 @@ CellularAutomata.prototype.initialRule = function(){
     this.rules[7].offSpring.alive = false;
 }
 
+CellularAutomata.prototype.saveData = function(that, pass){
+    pass.playButton.alive = false;
+    that.alive = false;
+
+    var data = {};
+    data['rule'] = [];
+    for(var i = 0; i < pass.rules.length; i++){
+        data['rule'].push(pass.rules[i].offSpring.alive);
+    }
+    data['boardstate'] = [];
+    for(var i = 0; i < pass.cells.length; i++){
+        data['boardstate'].push([]);
+        for(var j = 0; j < pass.cells[i].length; j++){
+            data['boardstate'][i].push(pass.cells[i][j].alive);
+        }
+    }
+    data['update'] = pass.nextUpdate;
+    socket.emit("save", { studentname: "Vinh Vien", statename: "gameData", data: data });
+    socket.emit("load", { studentname: "Vinh Vien", statename: "gameData" });
+}
+
+CellularAutomata.prototype.loadData = function(that, pass){
+    pass.playButton.alive = false;
+    that.alive = false;
+
+    socket.emit("load", { studentname: "Vinh Vien", statename: "gameData" });
+
+    socket.on("load", function (datas) {
+        var data = datas['data'];
+        for(var i = 0; i < data['rule'].length; i++){
+            pass.rules[i].offSpring.alive = data['rule'][i];
+        }
+        for(var i = 0; i < data['boardstate'].length; i++){
+            for(var j = 0; j < data['boardstate'][i].length; j++){
+                pass.cells[i][j].alive = data['boardstate'][i][j];
+            }
+        }
+        pass.nextUpdate = data['update'];
+    });
+}
+
+
+
 
 // CELL
-function Cell(game, x, y, size, phrase = undefined){
+function Cell(game, x, y, size, phrase = undefined, action = undefined, pass = undefined){
     Entity.call(this, game, x, y);
 
     this.alive = false;
@@ -328,6 +379,8 @@ function Cell(game, x, y, size, phrase = undefined){
     this.colliseBox = {x: x, y: y, width: this.width, height: this.height};
 
     this.phrase = phrase;
+    this.action = action;
+    this.pass = pass;
 
 }
 
@@ -340,6 +393,10 @@ Cell.prototype.update = function () {
         if (this.game.mouse.click) { 
             this.game.mouse.click = false;
             this.alive = !this.alive;
+            if(this.action !== undefined){
+                var that = this;
+                this.action(that, this.pass);
+            }
         }
     }
 
