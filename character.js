@@ -325,7 +325,7 @@ CellularAutomata.prototype.initialRule = function(){
 
 CellularAutomata.prototype.saveData = function(that, pass){
     pass.playButton.alive = false;
-    that.alive = false;
+    that.resetNext = true;
 
     var data = {};
     data['rule'] = [];
@@ -346,7 +346,7 @@ CellularAutomata.prototype.saveData = function(that, pass){
 
 CellularAutomata.prototype.loadData = function(that, pass){
     pass.playButton.alive = false;
-    that.alive = false;
+    that.resetNext = true;
 
     socket.emit("load", { studentname: "Vinh Vien", statename: "gameData" });
 
@@ -381,6 +381,7 @@ function Cell(game, x, y, size, phrase = undefined, action = undefined, pass = u
     this.phrase = phrase;
     this.action = action;
     this.pass = pass;
+    this.resetNext = false;
 
 }
 
@@ -389,6 +390,11 @@ Cell.prototype.constructor = Cell;
 
 Cell.prototype.update = function () {
     
+    if(this.resetNext){
+        this.alive = false;
+        this.resetNext = false;
+    }
+
     if (collise(this.colliseBox, this.game.mouse) && this.clickable) {
         if (this.game.mouse.click) { 
             this.game.mouse.click = false;
