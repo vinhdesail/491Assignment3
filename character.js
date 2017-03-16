@@ -118,6 +118,28 @@ Display.prototype.draw = function () {
 
 //////////////////////////////////////////////////////------------////////////////////////////////////////////////////////////////
 // Main Automata
+
+// SOCKET
+var socket = io.connect("http://76.28.150.193:8888");
+
+window.onload = function () {
+
+    // socket.on("ping", function (ping) {
+    //     console.log(ping);
+    //     socket.emit("pong");
+    // });
+
+    socket.on("connect", function () {
+        console.log("Socket connected.")
+    });
+    socket.on("disconnect", function () {
+        console.log("Socket disconnected.")
+    });
+    socket.on("reconnect", function () {
+        console.log("Socket reconnected.")
+    });
+};
+
 function CellularAutomata(game){
     Entity.call(this, game, 0, 0);
 
